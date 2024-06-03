@@ -17,6 +17,11 @@ router.route("/register").post(
   //   ]),
   registerUser
 );
+// i added this
+router.route("/register").post(
+  upload.single("avatar"),
+  registerUser
+);
 
 router.route("/test").post(test);
 
