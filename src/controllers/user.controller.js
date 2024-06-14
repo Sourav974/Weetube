@@ -38,7 +38,6 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // get user details from frontend
   const { fullName, email, password, username } = req.body;
-  console.log("req.body: ", req.body);
 
   // 2. validation  - not empty
   if (
@@ -258,7 +257,9 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body;
 
   const user = await User.findById(req.user?._id);
-  const isPasswordCorrect = user.isPasswordCorrect(oldPassword);
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+  console.log("is Password", isPasswordCorrect);
 
   if (!isPasswordCorrect) {
     throw new ApiError(400, "invalid old password");
@@ -281,7 +282,9 @@ const getCurrentUser = asyncHandler(async (req, res) => {
 const updateAccountDetails = asyncHandler(async (req, res) => {
   const { fullName, email } = req.body;
 
-  if (!fullName || email) {
+  console.log("req body", req.body);
+
+  if (!fullName || !email) {
     throw new ApiError(400, "All fields are required ");
   }
 
@@ -366,6 +369,8 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
 const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
 
+  console.log("username", username)
+
   if (!username?.trim()) {
     throw new ApiError(400, "username is missing");
   }
@@ -438,7 +443,7 @@ const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     {
       $match: {
-        _id: new mongoose.Types.createFronTime(req.user._id),
+        _id: new mongoose.Types.ObjectId(req.user._id),
       },
     },
 
@@ -479,12 +484,14 @@ const getWatchHistory = asyncHandler(async (req, res) => {
     },
   ]);
 
+  console.log("user", user)
+
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
-        user[0].getWatchHistory,
+        user[0].watchHistory,
         "Watch history fetched successfully"
       )
     );
